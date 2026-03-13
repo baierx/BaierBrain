@@ -289,7 +289,7 @@
       <div class="param-name">k — even integer</div>
       <div class="value-display value-k" id="disp-k">4</div>
       <input type="range" id="slider-k" min="2" max="16" step="2" value="4">
-      <div class="tick-row">
+      <div class="tick-row" id="tick-k">
         <span>2</span><span>4</span><span>6</span><span>8</span><span>10</span><span>12</span><span>14</span><span>16</span>
       </div>
     </div>
@@ -495,6 +495,15 @@ function render(n, k, beta) {
   const sliderK = document.getElementById('slider-k');
   sliderK.max = kMax;
   if (parseInt(sliderK.value) > kMax) sliderK.value = kMax;
+
+  // Rebuild tick labels: always show 2 at left, kMax at right, ~4 steps between
+  const tickRow = document.getElementById('tick-k');
+  const numTicks = Math.min(8, kMax / 2);  // at most 8 ticks, step of 2
+  const step = Math.max(2, Math.round((kMax - 2) / (numTicks - 1) / 2) * 2);
+  const ticks = [];
+  for (let t = 2; t <= kMax; t += step) ticks.push(t);
+  if (ticks[ticks.length - 1] !== kMax) ticks.push(kMax);
+  tickRow.innerHTML = ticks.map(t => `<span>${t}</span>`).join('');
   document.getElementById('disp-p').textContent = beta.toFixed(2);
   document.getElementById('st-n').textContent = n;
   document.getElementById('st-e').textContent = totalEdges;
