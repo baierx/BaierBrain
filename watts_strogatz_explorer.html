@@ -487,7 +487,14 @@ function render(n, k, beta) {
   const { traces, rewiredCount, totalEdges, kEff } = buildTraces(n, k, beta);
 
   document.getElementById('disp-n').textContent = n;
-  document.getElementById('disp-k').textContent = k;
+  document.getElementById('disp-k').textContent = kEff;
+  document.getElementById('disp-p').textContent = beta.toFixed(2);
+
+  // Clamp k slider max to the largest even number ≤ N-1
+  const kMax = n % 2 === 0 ? n - 2 : n - 1;
+  const sliderK = document.getElementById('slider-k');
+  sliderK.max = kMax;
+  if (parseInt(sliderK.value) > kMax) sliderK.value = kMax;
   document.getElementById('disp-p').textContent = beta.toFixed(2);
   document.getElementById('st-n').textContent = n;
   document.getElementById('st-e').textContent = totalEdges;
