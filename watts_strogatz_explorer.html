@@ -364,8 +364,13 @@ function wattsStrogatz(n, k, beta) {
   const kEff = Math.min(k, n - 1);
   const edges = [];
   for (let i = 0; i < n; i++) {
-    for (let j = 1; j <= kEff / 2; j++) {
+    for (let j = 1; j <= Math.floor(kEff / 2); j++) {
       edges.push([i, (i + j) % n, false]);
+    }
+    // For even n, add the antipodal edge (distance n/2) when kEff reaches it
+    if (n % 2 === 0 && kEff >= n / 2) {
+      const antipode = (i + n / 2) % n;
+      if (i < antipode) edges.push([i, antipode, false]); // add once per pair
     }
   }
   // 2. Rewiring
