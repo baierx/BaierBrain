@@ -360,8 +360,8 @@ function circleLayout(n) {
 
 // ── Watts–Strogatz construction ──────────────────────────────
 function wattsStrogatz(n, k, beta) {
-  // 1. Ring lattice — clamp k so it never exceeds n-1
-  const kEff = Math.min(k, n % 2 === 0 ? n - 2 : n - 1);
+  // 1. Ring lattice — clamp k so it never exceeds n-1 (complete graph at k=n-1)
+  const kEff = Math.min(k, n - 1);
   const edges = [];
   for (let i = 0; i < n; i++) {
     for (let j = 1; j <= kEff / 2; j++) {
