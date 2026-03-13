@@ -361,20 +361,17 @@ function circleLayout(n) {
 // ── Watts–Strogatz construction ──────────────────────────────
 function wattsStrogatz(n, k, beta) {
   // 1. Ring lattice — clamp k so it never exceeds n-1 (complete graph at k=n-1)
-  const kEff = Math.min(k, n - 1);
+  // k must be even in the WS model (k/2 neighbours each side).
+  // Cap at the largest even number ≤ N-1, which is N-2 for even N, N-1 for odd N.
+  const kEff = Math.min(k, n % 2 === 0 ? n - 2 : n - 1);
   const edges = [];
   for (let i = 0; i < n; i++) {
-    for (let j = 1; j <= Math.floor(kEff / 2); j++) {
+    for (let j = 1; j <= kEff / 2; j++) {
       edges.push([i, (i + j) % n, false]);
-    }
-    // For even n, add the antipodal edge (distance n/2) when kEff reaches it
-    if (n % 2 === 0 && kEff >= n / 2) {
-      const antipode = (i + n / 2) % n;
-      if (i < antipode) edges.push([i, antipode, false]); // add once per pair
     }
   }
   // 2. Rewiring
-  const adj = new Set(edges.map(([u, v]) => `${Math.min(u,v)}_${Math.max(u,v)}`));
+  const adj = new Set(edges.map(([u, v]) => `${Math.min(u,v)}_${Math.max(u,v)}`))
   for (let e = 0; e < edges.length; e++) {
     if (Math.random() < beta) {
       const u = edges[e][0];
@@ -403,6 +400,7 @@ function nodeSize(n) {
 // ── Build Plotly traces ──────────────────────────────────────
 function buildTraces(n, k, beta) {
   const { xs, ys } = circleLayout(n);
+  const kEff = Math.min(k, n % 2 === 0 ? n - 2 : n - 1);
   const edges = wattsStrogatz(n, k, beta);
 
   const regX = [], regY = [];
@@ -453,7 +451,7 @@ function buildTraces(n, k, beta) {
     showlegend: false
   };
 
-  return { traces: [traceRegEdges, traceRwEdges, traceNodes], rewiredCount, totalEdges: edges.length };
+  return { traces: [traceRegEdges, traceRwEdges, traceNodes], rewiredCount, totalEdges: edges.length, kEff };
 }
 
 // ── Layout config ────────────────────────────────────────────
@@ -486,14 +484,14 @@ function regimeText(beta) {
 let initialized = false;
 
 function render(n, k, beta) {
-  const { traces, rewiredCount, totalEdges } = buildTraces(n, k, beta);
+  const { traces, rewiredCount, totalEdges, kEff } = buildTraces(n, k, beta);
 
   document.getElementById('disp-n').textContent = n;
   document.getElementById('disp-k').textContent = k;
   document.getElementById('disp-p').textContent = beta.toFixed(2);
   document.getElementById('st-n').textContent = n;
   document.getElementById('st-e').textContent = totalEdges;
-  document.getElementById('st-d').textContent = Math.min(k, n - 1);
+  document.getElementById('st-d').textContent = kEff;
   document.getElementById('st-r').textContent = rewiredCount;
   document.getElementById('regime-desc').innerHTML = regimeText(beta);
   document.getElementById('formula-n').textContent = `N=${n}`;
